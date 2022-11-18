@@ -40,9 +40,9 @@ export class Usuario extends Entity {
 
   @property({
     type: 'string',
-    required: true,
+    required: true, // false,
   })
-  perfil: string;
+  perfil: string; //perfil?: string;
 
   @hasMany(() => Rol, {through: {model: () => RolUsuario}})
   roles: Rol[];
