@@ -3,6 +3,6 @@
 export namespace keys{
     //llave decifrado
     export const llaveJWT = "JWTmintic2022*";
-    export const urlNotificaciones = "http://localhost:5000/";
+    export const urlNotificaciones = "http://127.0.0.1:5000";
      
 }
