@@ -25,10 +25,24 @@ export class UsuarioRepository extends DefaultCrudRepository<
 
   public readonly asesores: HasManyRepositoryFactory<Asesor, typeof Usuario.prototype.id>;
 
+  public readonly rolUsuario: HasManyThroughRepositoryFactory<Rol, typeof Rol.prototype.id,
+          RolUsuario,
+          typeof Usuario.prototype.id
+        >;
+
+  public readonly rols: HasManyThroughRepositoryFactory<Rol, typeof Rol.prototype.id,
+          RolUsuario,
+          typeof Usuario.prototype.id
+        >;
+
   constructor(
     @inject('datasources.mongodb') dataSource: MongodbDataSource, @repository.getter('RolUsuarioRepository') protected rolUsuarioRepositoryGetter: Getter<RolUsuarioRepository>, @repository.getter('RolRepository') protected rolRepositoryGetter: Getter<RolRepository>, @repository.getter('PropietarioRepository') protected propietarioRepositoryGetter: Getter<PropietarioRepository>, @repository.getter('ClienteRepository') protected clienteRepositoryGetter: Getter<ClienteRepository>, @repository.getter('AsesorRepository') protected asesorRepositoryGetter: Getter<AsesorRepository>,
   ) {
     super(Usuario, dataSource);
+    this.rols = this.createHasManyThroughRepositoryFactoryFor('rols', rolRepositoryGetter, rolUsuarioRepositoryGetter,);
+    this.registerInclusionResolver('rols', this.rols.inclusionResolver);
+    this.rolUsuario = this.createHasManyThroughRepositoryFactoryFor('rolUsuario', rolRepositoryGetter, rolUsuarioRepositoryGetter,);
+    this.registerInclusionResolver('rolUsuario', this.rolUsuario.inclusionResolver);
     this.asesores = this.createHasManyRepositoryFactoryFor('asesores', asesorRepositoryGetter,);
     this.registerInclusionResolver('asesores', this.asesores.inclusionResolver);
     this.clientes = this.createHasManyRepositoryFactoryFor('clientes', clienteRepositoryGetter,);
