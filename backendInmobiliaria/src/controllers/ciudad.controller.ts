@@ -1,3 +1,4 @@
+import { authenticate } from '@loopback/authentication';
 import {
   Count,
   CountSchema,
@@ -19,13 +20,19 @@ import {
 } from '@loopback/rest';
 import {Ciudad} from '../models';
 import {CiudadRepository} from '../repositories';
-
+//Solo el usuario administrador puede accesar todos los metodos del
+//controlador ciudad!!!
+//@authenticate("admin")
 export class CiudadController {
   constructor(
     @repository(CiudadRepository)
     public ciudadRepository : CiudadRepository,
   ) {}
-
+  //Solo el usuario administrador puede accesar el metodo @post('/ciudads')
+  @authenticate("admin")
+  //Si todos los metodos del controlador ciudad solo tienen acceso por el
+  //administrador y queremos que algun metodo no lo tenga, hacemos los sgte
+  //@authenticate.skip() Desbloquea un metodo 
   @post('/ciudads')
   @response(200, {
     description: 'Ciudad model instance',

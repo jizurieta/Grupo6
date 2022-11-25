@@ -43,7 +43,7 @@ export class UsuarioRolController {
     @param.path.string('id') id: string,
     @param.query.object('filter') filter?: Filter<Rol>,
   ): Promise<Rol[]> {
-    return this.usuarioRepository.rols(id).find(filter);
+    return this.usuarioRepository.roles(id).find(filter);
   }
 
   @post('/usuarios/{id}/rols', {
@@ -67,7 +67,7 @@ export class UsuarioRolController {
       },
     }) rol: Omit<Rol, 'id'>,
   ): Promise<Rol> {
-    return this.usuarioRepository.rols(id).create(rol);
+    return this.usuarioRepository.roles(id).create(rol);
   }
 
   @patch('/usuarios/{id}/rols', {
@@ -90,7 +90,7 @@ export class UsuarioRolController {
     rol: Partial<Rol>,
     @param.query.object('where', getWhereSchemaFor(Rol)) where?: Where<Rol>,
   ): Promise<Count> {
-    return this.usuarioRepository.rols(id).patch(rol, where);
+    return this.usuarioRepository.roles(id).patch(rol, where);
   }
 
   @del('/usuarios/{id}/rols', {
@@ -105,6 +105,6 @@ export class UsuarioRolController {
     @param.path.string('id') id: string,
     @param.query.object('where', getWhereSchemaFor(Rol)) where?: Where<Rol>,
   ): Promise<Count> {
-    return this.usuarioRepository.rols(id).delete(where);
+    return this.usuarioRepository.roles(id).delete(where);
   }
 }

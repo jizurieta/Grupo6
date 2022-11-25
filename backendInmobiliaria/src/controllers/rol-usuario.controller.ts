@@ -1,3 +1,8 @@
+//Este modelo y usuario-rol-OLD.controller.ts NO se USAN
+//igual que los modelos appweb; porque en la Modeulo 5 (Sesion 13) se 
+//implemeta el modelo de seguridad independiente y los modelos,
+//relaciones y controladores se crearon en el Modulo 2, no hubo tiempo
+//de hacer la correcion 
 import {
   Count,
   CountSchema,

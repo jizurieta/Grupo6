@@ -27,3 +27,4 @@ export * from './rol-usuario.controller';
 export * from './usuario-propietario.controller';
 export * from './usuario-cliente.controller';
 export * from './usuario-asesor.controller';
+export * from './usuario-rol.controller';

@@ -18,10 +18,11 @@ import {
   requestBody,
   response,
   HttpErrors,
+  Request,
 } from '@loopback/rest';
 import { keys } from '../configuracion/keys';
-import {Credenciales, Usuario} from '../models';
-import {UsuarioRepository} from '../repositories';
+import {CambioPassword, Credenciales, Usuario} from '../models';
+import {AsesorRepository, ClienteRepository, PropietarioRepository, UsuarioRepository} from '../repositories';
 //Hacemos uso del servicio de autenticacion
 import {AutenticacionService} from '../services';
 //A traves de una constante extraemos el paquete 
@@ -29,13 +30,21 @@ const fetch = require("node-fetch");
 
 export class UsuarioController {
   constructor(
+    //Inicializamos los repositorios de: usuario, propietario,
+    //cliente y asesor
     @repository(UsuarioRepository)
     public usuarioRepository : UsuarioRepository,
+    @repository(PropietarioRepository)
+    public propietarioRepositorio: PropietarioRepository,
+    @repository(ClienteRepository)
+    public clienteRepositorio: ClienteRepository,
+    @repository(AsesorRepository)
+    public asesorRepositorio: AsesorRepository,
     //inicializamos el servicio de autenticacion
     @service(AutenticacionService)
-    public servicioAutenticacion : AutenticacionService
+    public servicioAutenticacion : AutenticacionService,
   ) {}
-  //Cambianos la ruta /usuarios a /registro @post('/usuarios').
+  //Cambianos la ruta @post('/usuarios') a @post('/registro').
   //La estrategia a seguir es: capturar el email del usuario y
   //a ese email le asignamos el password
   @post('/registro')
@@ -63,19 +72,30 @@ export class UsuarioController {
       usuario.clave = passwordEncriptado;
       //Espere hasta que almacene el obj usuario 
       let usu = await this.usuarioRepository.create(usuario);
-      //Inicia proceso de Notificacion al usuario (Sin usar el simulador POSTMAN) 
+      
+      if (usuario.perfil == "Propietario"){
+        let pro = await this.propietarioRepositorio.create(usuario);
+      }else if(usuario.perfil == "Cliente"){
+        let cli = await this.clienteRepositorio.create(usuario);
+      }else if(usuario.perfil == "Asesor"){
+        let ase = await this.asesorRepositorio.create(usuario);
+      }else{
+        throw new HttpErrors[401]("Perfil no existe!!!");
+      }
+
+      //Inicia proceso de NOTIFICACION al usuario (Sin usar el simulador POSTMAN) 
       let destino = usu.correo; 
       let asunto  = 'Registro en la APP INMOBILIARIA...';
-      //Usamos un string templete para generar el mensaje
-      let mensaje = `Hola, ${usu.usuario}, su nombre de usuario es: ${usu.correo} y su contraseña es: ${password}`; 
+      //Usamos un string templete (``) para generar el mensaje
+      let mensaje = `Hola, ${usu.nombre}, su nombre de usuario es: ${usu.correo} y su contraseña es: ${password}`; 
       //vamos a consumir la aplicacion (server.py) que esta en python, para ello debemos instalar el 
       //paquete [fetch]
       //[/e-mail] definida en el archivo server.py en python @app.route('/e-mail')
       //then significa que va a enviar la respuesta cuando ejecute este metodo.
-      //fetch(`http://localhost:5000/e-mail?correo_destino=${destino}&asunto=${asunto}&contenido=${mensaje}`)
+      //fetch(`http://127.0.0.1:5000/e-mail?correo_destino=${destino}&asunto=${asunto}&contenido=${mensaje}`)
       //Ahora reemplazamos la ruta http://localhost:5000 por un apuntador al archivo [keys]
-      fetch(`${keys.urlNotificaciones}/e-mail?correo_destino=${destino}&asunto=${asunto}&contenido=${mensaje}`)
-      .then((data:any)=>{ //evalua cualquier tipo de dato que envie el servidor
+      fetch(`${keys.urlNotificaciones}/e-mail?correo_destino=${destino}&asunto=${asunto}&contenido=${mensaje}`).then
+        ((data:any)=>{ //evalua cualquier tipo de dato que envie el servidor
           console.log(data); //muestra los datos que envia el servidor a traves de la consola de la app.
         });
     return usu;
@@ -200,19 +220,110 @@ export class UsuarioController {
     @requestBody() credenciales:Credenciales
     //Promete devolver un objeto de tipo Usuario o un
     //Obj nulo
-  ):Promise<Usuario | null>{
+  ){ //:Promise<Usuario | null>{
       let claveCifrada = this.servicioAutenticacion.encriptarPassword(credenciales.password);
       //Generamos una variable que espera para cargarse hasta
       //recibir una respuesta de un elemento especifico(findOne)
       //donde el correo es igual al usuario
-      let usuario = await this.usuarioRepository.findOne({
-        where:{
-          correo:credenciales.usuario,
-          clave:claveCifrada
+      //let usuario = await this.usuarioRepository.findOne({
+      //  where:{
+      //    correo:credenciales.usuario,
+      //    clave:claveCifrada//clave:credenciales.password
+      //  }
+      //});
+
+      let usu = await this.servicioAutenticacion.identificarUsuario(credenciales);
+      if (usu){
+        let token = this.servicioAutenticacion.generarToken(usu) 
+        return{
+          info:{
+            nombre:usu.nombre,
+            correo:usu.correo
+          },
+          tk:token
         }
-      });
-      return usuario;
+      }else{
+        throw new HttpErrors[401]("Datos no validos!!!") 
+      } 
+      //return usu;
   }
+
+  @post('/RecuperarPassword')
+  @response(200, {
+    description:"Recuperacion de contraseña"
+  })
+  async recuperar(
+    //El usuario envia una solicitud y capturamos la solicitud a traves del Body
+    //de la pagina; el usuario envia el email  
+    @requestBody() email : string
+  ):Promise<Boolean>{
+    let usu = await this.usuarioRepository.findOne({
+       where:{
+        //Donde el correo coincida con el email
+        correo:email
+       } 
+    });
+    if (usu){
+      //Generar contraseña
+      let clave = this.servicioAutenticacion.generarPassword();
+      let claveCifrada = this.servicioAutenticacion.encriptarPassword(clave);
+      usu.clave = claveCifrada;
+      //me conecto a la BD por el metodo await
+      await this.usuarioRepository.updateById(usu.id, usu);
+      /*Notificacion de cambio de contarseña al usuario*/
+      let destino = usu.correo;
+      let asunto  = "Recuperacion de password desde la App-Inmobilaria";
+      let mensaje = `Hola, ${usu.nombre}, se realizo la recuperacion del password de ingreso a la App; su nuevo password es: ${clave}`;
+      
+      fetch(`${keys.urlNotificaciones}/e-mail?correo_destino=${destino}&asunto=${asunto}&contenido=${mensaje}`).then
+      ((data:any)=>{ //evalua cualquier tipo de dato que envie el servidor
+        console.log(data); //muestra los datos que envia el servidor a traves de la consola de la app.
+      });
+      console.log("Se ha enviado el nuevo password al usuario")
+      return true;
+    }else{
+      console.log("El usuario no fue encontrado")
+      return false;
+    }
+  }
+
+  @post('/ModificarPassword')
+  @response(200,{
+    description:"Modificar contraseña de parte del usuario"
+  })
+  async modificar(
+    @requestBody () datos: CambioPassword 
+  ):Promise <Boolean>{
+    let usu = await this.usuarioRepository.findOne({
+      where:{
+        clave: this.servicioAutenticacion.encriptarPassword(datos.passActual)
+      }
+    });
+    if (usu){
+      if (datos.passNuevo == datos.passValidado){
+        usu.clave = this.servicioAutenticacion.encriptarPassword(datos.passNuevo);
+        await this.usuarioRepository.updateById(usu.id, usu);
+        /**Notificar al usuario el cambio de contraseña */
+        let destino = usu.correo;
+        let asunto  = "Cambio del password en la App-Inmobilaria";
+        let mensaje = `Hola, ${usu.nombre}, ud ha realiza un cambio de password para ingreso a la App; su nuevo password es: ${datos.passNuevo}`;
+        
+        fetch(`${keys.urlNotificaciones}/e-mail?correo_destino=${destino}&asunto=${asunto}&contenido=${mensaje}`).then
+        ((data:any)=>{ //evalua cualquier tipo de dato que envie el servidor
+          console.log(data); //muestra los datos que envia el servidor a traves de la consola de la app.
+        });
+        console.log("El cambio de contraseña fue exitoso");
+        return true;
+      }else{
+        console.log("Las contraseñas no coinciden")
+        return false;
+      } 
+    }else{
+      console.log("El usaurio no existe en la BD");
+      return false;
+    }
+  }
+
   //Vamos a generar un logueo con Token
   @post('/LoginT')
   //Generamos una respuesta con Cod. 200
@@ -234,8 +345,9 @@ export class UsuarioController {
       let token = this.servicioAutenticacion.generarToken(usu);
       return{
         datos:{
+          //Al realizar la consulta desde el Postman lo retorna en formato JSON
           id:usu.id,
-          nombre:usu.usuario 
+          nombre:usu.nombre 
         },
         //Este dato se muestra solo como prueba, no se debe mostrar al cliente
         tk:token
