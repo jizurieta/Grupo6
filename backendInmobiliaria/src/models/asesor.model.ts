@@ -12,9 +12,9 @@ export class Asesor extends Entity {
 
   @property({
     type: 'string',
-    required: true,
+    required: false, //true
   })
-  cedula: string;
+  cedula?: string; //cedula: string; opcional
 
   @property({
     type: 'string',
@@ -26,7 +26,7 @@ export class Asesor extends Entity {
     type: 'string',
     required: true,
   })
-  apellido: string;
+  correo: string; //apellido: string;
 
   @property({
     type: 'string',
@@ -36,15 +36,27 @@ export class Asesor extends Entity {
 
   @property({
     type: 'string',
-    required: true,
+    required: false, // true
   })
-  direccion: string;
+  direccion?: string; //direccion: string; opcional
 
   @property({
     type: 'string',
-    required: true,
+    required: false,
   })
-  estadoDecision: string;
+  clave?: string;
+
+  @property({
+    type: 'string',
+    required: false,
+  })
+  perfil?: string;
+
+  @property({
+    type: 'string',
+    required: false, //true
+  })
+  estadoDecision?: string; //estadoDecision: string; opcional
 
   @property({
     type: 'string',

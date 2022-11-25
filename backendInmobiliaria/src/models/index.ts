@@ -12,3 +12,5 @@ export * from './usuario.model';
 export * from './rol.model';
 export * from './rol-usuario.model';
 export * from './credenciales.model';
+export * from './rol-usuario.model';
+export * from './cambio-password.model';

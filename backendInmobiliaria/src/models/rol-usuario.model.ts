@@ -7,19 +7,10 @@ export class RolUsuario extends Entity {
     id: true,
     generated: true,
   })
+  //Solo se crea la propiedad id porque este modelo
+  //maneja las relaciones; las otras propiedades
+  //se generan al momento de generar las relaciones
   id?: string;
-
-  @property({
-    type: 'string',
-    required: true,
-  })
-  idUsuario: string;
-
-  @property({
-    type: 'string',
-    required: true,
-  })
-  idRol: string;
 
   @property({
     type: 'string',

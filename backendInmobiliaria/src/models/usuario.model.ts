@@ -18,7 +18,7 @@ export class Usuario extends Entity {
     type: 'string',
     required: true,
   })
-  usuario: string;
+  nombre: string; //usuario: string;
 
   @property({
     type: 'string',
@@ -30,7 +30,7 @@ export class Usuario extends Entity {
     type: 'string',
     required: true,
   })
-  celular: string;
+  telefono: string; //celular: string;
 
   @property({
     type: 'string',
@@ -40,9 +40,9 @@ export class Usuario extends Entity {
 
   @property({
     type: 'string',
-    required: true, // false,
+    required: false, // false, opcional
   })
-  perfil: string; //perfil?: string;
+  perfil?: string; //perfil?: string; opcional
 
   @hasMany(() => Rol, {through: {model: () => RolUsuario}})
   roles: Rol[];
@@ -55,6 +55,12 @@ export class Usuario extends Entity {
 
   @hasMany(() => Asesor)
   asesores: Asesor[];
+
+  @hasMany(() => Rol, {through: {model: () => RolUsuario}})
+  rolUsuario: Rol[];
+
+  @hasMany(() => Rol, {through: {model: () => RolUsuario}})
+  rols: Rol[];
 
   constructor(data?: Partial<Usuario>) {
     super(data);

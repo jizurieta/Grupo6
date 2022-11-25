@@ -26,7 +26,7 @@ export class Propietario extends Entity {
     type: 'string',
     required: true,
   })
-  apellido: string;
+  correo: string; //apellido: string;
 
   @property({
     type: 'string',
@@ -39,6 +39,12 @@ export class Propietario extends Entity {
     required: true,
   })
   direccion: string;
+
+  @property({
+    type: 'string',
+    required: false,
+  })
+  clave?: string;
 
   @hasMany(() => Inmueble)
   inmuebles: Inmueble[];
