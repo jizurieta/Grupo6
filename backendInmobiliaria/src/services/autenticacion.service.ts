@@ -46,7 +46,7 @@ export class AutenticacionService {
         where:{
           correo:credenciales.usuario,
           clave:credenciales.password
-        }
+        }, include:['rols'] //Incluye en la consulta el Obj Rol
       });
       //Si existe el usuario (var usu)
       if (usu){
@@ -58,7 +58,7 @@ export class AutenticacionService {
     }
   }
   //Vamos a generar el Token, y para ello instalamos el paquete [jsonwebtoken]
-  //http://jwt.io
+  //La funcionalidad del token es poder establecer los PERMISOS. http://jwt.io
   generarToken(usuario:Usuario){
     //Accesdemos al metodo de firma a traves de la Clase [tokenJWT]
     let token = tokenJWT.sign({
@@ -69,12 +69,13 @@ export class AutenticacionService {
         id:usuario.id,
         //El correo lo vamos a usar para las Notificaciones
         correo:usuario.correo,
-        nombre:usuario.usuario
+        nombre:usuario.nombre,
+        rol:usuario.rols
       }
     },//2do parametro, la llave de encriptacion del dato
     keys.llaveJWT);
 
-    return tokenJWT;
+    return token;
   }
   
   validarToken(token:string){
