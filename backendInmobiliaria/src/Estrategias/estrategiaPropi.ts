@@ -1,3 +1,10 @@
+//Para implementar la Estrategia del Configurador o cualquier otra, 
+//simplemente copiamos la Estrategia del administrador y realizamos
+//los sgtes cambios:
+/**
+ * 1) Modificar el nombre de la Clase:EstrategiaAdmin->EstrategiaPropi
+ * 2) Modificar el nombre de la Estrategia: admin->propi
+ *   */ 
 import {AuthenticationStrategy} from "@loopback/authentication";
 import { Request, RedirectRoute, HttpErrors } from "@loopback/rest";
 import { UserProfile } from "@loopback/security";
@@ -9,9 +16,9 @@ import { service } from "@loopback/core";
 //inicializamos una bandera
 var respuesta:Boolean = false;
 
-export class EstrategiaAdmin implements AuthenticationStrategy{
+export class EstrategiaPropi implements AuthenticationStrategy{//Cambiamos nombre Clase
     //nombre de la estrategia
-    name: string = "admin";
+    name: string = "propi"; //Cambiamos el nombre
 
     constructor(
       @service(AutenticacionService)
@@ -41,7 +48,7 @@ export class EstrategiaAdmin implements AuthenticationStrategy{
              //REcorremos la lst rol[] que hay en el Obj DATA (data)
              //del token (datos)
              datos.data.rol.forEach(function(i:any) {
-                if (i.nombre == "administrador"){
+                if (i.nombre == "propietario"){
                   respuesta = true;
                 }
              });
@@ -51,16 +58,16 @@ export class EstrategiaAdmin implements AuthenticationStrategy{
                 });
                 return perfil;
              }else{
-                throw new HttpErrors[401]("Ud no tiene permisos de Administrador")
+                throw new HttpErrors[401]("Ud no tiene permisos de Propietario");
              } 
           }else{
-            throw new HttpErrors[401]("Ud No tiene permisos de acceso para este recurso")
+            throw new HttpErrors[401]("Ud No tiene permisos de acceso para este recurso");
           }  
         }else{
-            throw new HttpErrors[401]("El Token no es valido")
+            throw new HttpErrors[401]("El Token no es valido");
         }
       }else{
         throw new HttpErrors[401]("No hay Token para la solicitud")
-      }  
-    }
+      }
+    }   
 }
