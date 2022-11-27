@@ -12,9 +12,9 @@ export class Propietario extends Entity {
 
   @property({
     type: 'string',
-    required: true,
+    required: false, //true,
   })
-  cedula: string;
+  cedula?: string; //cedula?: string;
 
   @property({
     type: 'string',
@@ -36,15 +36,21 @@ export class Propietario extends Entity {
 
   @property({
     type: 'string',
-    required: true,
+    required: false, //true,
   })
-  direccion: string;
+  direccion?: string; //direccion: string;
 
   @property({
     type: 'string',
     required: false,
   })
   clave?: string;
+
+  @property({
+    type: 'string',
+    required: false,
+  })
+  perfil?: string;
 
   @hasMany(() => Inmueble)
   inmuebles: Inmueble[];
