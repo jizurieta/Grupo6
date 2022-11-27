@@ -9,6 +9,11 @@ import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import {MySequence} from './sequence';
+import { AuthenticationComponent, registerAuthenticationStrategy } from '@loopback/authentication';
+import { EstrategiaAdmin } from './Estrategias/estrategiaAdmin';
+import { EstrategiaPropi } from './Estrategias/estrategiaPropi';
+import { EstrategiaAsesor } from './Estrategias/estrategiaAsesor';
+import { EstrategiaCli } from './Estrategias/estrategiaCli';
 
 export {ApplicationConfig};
 
@@ -40,5 +45,11 @@ export class App extends BootMixin(
         nested: true,
       },
     };
+    registerAuthenticationStrategy(this, EstrategiaAdmin);
+    registerAuthenticationStrategy(this, EstrategiaPropi);
+    registerAuthenticationStrategy(this, EstrategiaAsesor);
+    registerAuthenticationStrategy(this, EstrategiaCli);
+    //copiamos el componente de autenticacion desde loopback.io 
+    this.component(AuthenticationComponent);
   }
 }
