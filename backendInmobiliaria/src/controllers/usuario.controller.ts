@@ -73,11 +73,11 @@ export class UsuarioController {
       //Espere hasta que almacene el obj usuario 
       let usu = await this.usuarioRepository.create(usuario);
       
-      if (usuario.perfil == "Propietario"){
+      if (usuario.perfil == "propietario"){
         let pro = await this.propietarioRepositorio.create(usuario);
-      }else if(usuario.perfil == "Cliente"){
+      }else if(usuario.perfil == "cliente"){
         let cli = await this.clienteRepositorio.create(usuario);
-      }else if(usuario.perfil == "Asesor"){
+      }else if(usuario.perfil == "asesor"){
         let ase = await this.asesorRepositorio.create(usuario);
       }else{
         throw new HttpErrors[401]("Perfil no existe!!!");

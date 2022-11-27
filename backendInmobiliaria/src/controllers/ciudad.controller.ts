@@ -20,16 +20,16 @@ import {
 } from '@loopback/rest';
 import {Ciudad} from '../models';
 import {CiudadRepository} from '../repositories';
-//Solo el usuario administrador puede accesar todos los metodos del
-//controlador ciudad!!!
-//@authenticate("admin")
+//Solo el usuario administrador y el propietario puede accesar 
+//todos los metodos del controlador ciudad!!!
+//@authenticate("admin", "propi")
 export class CiudadController {
   constructor(
     @repository(CiudadRepository)
     public ciudadRepository : CiudadRepository,
   ) {}
-  //Solo el usuario administrador puede accesar el metodo @post('/ciudads')
-  @authenticate("admin")
+  //El usuario propietario y asesor pueden accesar el metodo @post('/ciudads')
+  @authenticate("propi", "asesor")
   //Si todos los metodos del controlador ciudad solo tienen acceso por el
   //administrador y queremos que algun metodo no lo tenga, hacemos los sgte
   //@authenticate.skip() Desbloquea un metodo 
